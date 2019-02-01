@@ -1,0 +1,100 @@
+﻿
+1. Create an index hiking. (use default setting of 5 shards and 1 replica)
+
+
+2. Add one or more documents in the index created consisting the following fields:
+* hiked_on (with date value of format yyyy/MM/dd, example “2019/01/26”)
+* coordinator (with string value, example “Ruby Shrestha”)
+* total_students (with integer value, example 12)
+* cost (with floating point value, example 3456.67)
+* bus_booked (with boolean, example true/false)
+* checklist (with array of string, example [“a”,”b”])
+* test_field (any kind of value you want)
+
+
+**You can create any other index if you want to and add document(s) with the fields that you want to, but make sure that the added document(s) consist of above mentioned values.
+
+
+3. Practice retrieving documents by various methods shown in examples.
+
+
+4. Update any inserted document by adding a new field without using script. (Related to normal update)
+
+
+5. Update any inserted document to add a new field and remove field added in (4) at the same time using script. (Related to scripted update)
+
+
+6. Update any field of any inserted document (say total_students) to change its value. Make use of params. (Related to scripted update)
+
+
+7. Use loop and condition to carry out any operation in any inserted document (Related to scripted update)
+
+
+
+Answers
+
+
+PUT hiking
+ {
+   "settings": {
+     "index":{
+       "number_of_shards" : 5,
+       "number_of_replicas" :1
+     }
+   }
+ }
+ 
+ PUT hiking/_doc/1
+ {"hiked_on":"2019/01/26", "coordinator":"Ruby Shrestha", "total_students":12,"cost":3456.67,"bus_booked":true, "checklist":["a"], "test_field":2}
+ 
+GET hiking/_doc/1
+GET hiking/_doc/_search
+GET hiking/_doc/1/_source
+
+POST hiking/_doc/1/_update
+{"doc":{"destination":"nagarkot"}}
+
+
+POST hiking/_doc/1/_update
+{
+  "script": {
+    "lang":"painless",
+    "source":"ctx._source.photographer='shreya'"
+  }
+}
+
+POST hiking/_doc/1/_update
+{
+  "script": {
+    "lang":"painless",
+    "source":"ctx._source.remove('destination')"
+  }
+}
+
+
+POST hiking/_doc/1/_update
+{
+  "script": {
+    "lang": "painless",
+    "source":"ctx._source.total_students+=params.val",
+    "params": {
+      "val":2
+    }
+    
+  }
+}
+
+POST hiking/_doc/1/_update
+{
+  "script": {
+    "lang":"painless",
+    "source":"""
+    for(int i=0;i<5;i++){
+    String val="c"+i;
+    if(!ctx._source.checklist.contains(val)){
+    ctx._source.checklist.add(val)
+}
+    }"""
+  }
+}
+
